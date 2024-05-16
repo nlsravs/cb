@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chatbot</title>
     <style>
-        /* Basic styling for the chat container and chat box */
         #chat-container {
             width: 300px;
             margin: 0 auto;
@@ -28,26 +27,32 @@
     </div>
     <script>
         function sendMessage() {
-            // Get user's message
             var userMessage = document.getElementById("user-input").value;
-            
-            // Display user's message in the chat box
             document.getElementById("chat-box").innerHTML += "<p><strong>You:</strong> " + userMessage + "</p>";
-            
-            // Clear the input field
             document.getElementById("user-input").value = "";
             
-            // Send the message to the server
             var xhttp = new XMLHttpRequest();
             xhttp.onreadystatechange = function() {
                 if (this.readyState == 4 && this.status == 200) {
-                    // Display chatbot's response in the chat box
-                    var botResponse = this.responseText;
-                    document.getElementById("chat-box").innerHTML += "<p><strong>Chatbot:</strong> " + botResponse + "</p>";
+                    var response = JSON.parse(this.responseText).response;
+                    document.getElementById("chat-box").innerHTML += "<p><strong>Chatbot:</strong> " + response + "</p>";
+                    sendResponseToServer(response);
                 }
             };
             xhttp.open("GET", "/get?msg=" + userMessage, true);
             xhttp.send();
+        }
+        
+        function sendResponseToServer(response) {
+            var xhttp = new XMLHttpRequest();
+            xhttp.open("POST", "/send-response", true);
+            xhttp.setRequestHeader("Content-Type", "application/json");
+            xhttp.onreadystatechange = function() {
+                if (this.readyState == 4 && this.status == 200) {
+                    console.log("Server response:", JSON.parse(this.responseText).message);
+                }
+            };
+            xhttp.send(JSON.stringify({ "response": response }));
         }
     </script>
 </body>
